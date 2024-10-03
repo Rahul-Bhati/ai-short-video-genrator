@@ -7,7 +7,7 @@ const Header = () => {
     return (
         <div className='p-3 px-5 flex items-center justify-between shadow-md'>
             <div className='flex gap-3 items-center'>
-                <Image src={"./logo.svg"} width={30} height={30} />
+                <Image src={"/logo.svg"} width={30} height={30} alt='logo' />
                 <h2 className='text-xl font-bold'>Ai Short Vid</h2>
             </div>
             <div className='flex gap-3 items-center'>
