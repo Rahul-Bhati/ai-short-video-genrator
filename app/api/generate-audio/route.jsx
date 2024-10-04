@@ -17,6 +17,7 @@ export async function POST(req) {
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
+    // A BUSTLING MAKETPLACE in ancient rome, with people selling goods, merchants haggling, and citizens going about their daily lives. Realistic, detailed, and vibrant colors. 
 
     const apiUrl = 'https://api.voicerss.org/';
 

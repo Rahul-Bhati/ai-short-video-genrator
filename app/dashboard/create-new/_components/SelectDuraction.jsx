@@ -18,6 +18,7 @@ const SelectDuraction = ({ onUserSelect }) => {
                     <SelectValue placeholder="Select Duration" />
                 </SelectTrigger>
                 <SelectContent>
+                    <SelectItem value="15 Second">15 Sec</SelectItem>
                     <SelectItem value="30 Second">30 Sec</SelectItem>
                     <SelectItem value="60 Second">60 Sec</SelectItem>
                 </SelectContent>
