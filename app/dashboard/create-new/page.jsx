@@ -11,6 +11,7 @@ import { VideoDataContext } from '@/app/_context/VideoDataContext';
 import { db } from '@/config/db';
 import { VideoData } from '@/config/schema';
 import { useUser } from '@clerk/nextjs';
+import PlayerDialog from '../_components/PlayerDialog';
 
 const CreateNew = () => {
 //   const video = [
@@ -33,6 +34,9 @@ const CreateNew = () => {
   const {videoData, setVideoData} = useContext(VideoDataContext);
 
   const {user} = useUser();
+
+  const [playVideo, setPlayVideo] = useState(false);
+  const [videoId, setVideoId] = useState();
 
   const onHandleInputChange = (fieldName, fieldValue) => {
     // console.log(fieldName, fieldValue);
@@ -165,6 +169,8 @@ const CreateNew = () => {
     }).returning({id:VideoData?.id});
     
     console.log(result);
+    setVideoId(result[0].id);
+    setPlayVideo(true);
     setLoading(false);
   }
 
@@ -182,6 +188,8 @@ const CreateNew = () => {
         <Button className="mt-10 w-full" onClick={handleCreateShortVideo}>Create Short Video</Button>
       </div>
       <CustomLoading loading={loading} />
+
+      <PlayerDialog playVideo={true} videoId={1}/>
     </div >
   )
 }
