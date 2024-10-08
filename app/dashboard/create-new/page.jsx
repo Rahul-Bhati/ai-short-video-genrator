@@ -14,15 +14,15 @@ import { useUser } from '@clerk/nextjs';
 import PlayerDialog from '../_components/PlayerDialog';
 
 const CreateNew = () => {
-//   const video = [
-//     {"ImagePrompt": "A close-up of Sarah's face, now pale and drawn, with her eyes filled with fear and a sense of dread. She stares into the darkness, knowing that she will never forget what she saw in the cabin.",
-//     "ContentText": "Sarah never went back to the woods, haunted by the chilling encounter. The memory of the glowing red eyes and the creature lurking in the shadows lingered, a constant reminder of the terror that lurked in the darkness."
-// },
-//     {
-//       "ImagePrompt": "A young woman, looking scared and alone, standing at the edge of the forest, the cabin in the background. Her eyes are wide with fear, and she is clutching a lantern tightly.",
-//       "ContentText": "One stormy night, a young woman named Sarah found herself lost in the woods. Seeking shelter, she stumbled upon the cabin, its windows dark and unwelcoming."
-//   }
-//   ]
+  //   const video = [
+  //     {"ImagePrompt": "A close-up of Sarah's face, now pale and drawn, with her eyes filled with fear and a sense of dread. She stares into the darkness, knowing that she will never forget what she saw in the cabin.",
+  //     "ContentText": "Sarah never went back to the woods, haunted by the chilling encounter. The memory of the glowing red eyes and the creature lurking in the shadows lingered, a constant reminder of the terror that lurked in the darkness."
+  // },
+  //     {
+  //       "ImagePrompt": "A young woman, looking scared and alone, standing at the edge of the forest, the cabin in the background. Her eyes are wide with fear, and she is clutching a lantern tightly.",
+  //       "ContentText": "One stormy night, a young woman named Sarah found herself lost in the woods. Seeking shelter, she stumbled upon the cabin, its windows dark and unwelcoming."
+  //   }
+  //   ]
   const [loading, setLoading] = useState(false);
   const [videoScript, setVideoScript] = useState();
   const [formData, setFormData] = useState([]);
@@ -31,9 +31,9 @@ const CreateNew = () => {
   const [imageList, setImageList] = useState();
 
   // video data context
-  const {videoData, setVideoData} = useContext(VideoDataContext);
+  const { videoData, setVideoData } = useContext(VideoDataContext);
 
-  const {user} = useUser();
+  const { user } = useUser();
 
   const [playVideo, setPlayVideo] = useState(false);
   const [videoId, setVideoId] = useState();
@@ -52,17 +52,17 @@ const CreateNew = () => {
   }
 
   // Get Video Script
-  const getVideoScript = async () => { 
+  const getVideoScript = async () => {
     setLoading(true);
     const prompt = `write a script to genrate ${formData.duration} video on topic : ${formData.topic} along with Ai Image prompt in ${formData.imageStyle} format for each scene and give me result in json format with ImagePrompt and ContentText as field`;
 
     // console.log(prompt);
     await axios.post('/api/get-video-script', {
       prompt: prompt
-    }).then((res) => {  
+    }).then((res) => {
       setVideoData((prev) => ({
         ...prev,
-        "videoScript" : res.data.result
+        "videoScript": res.data.result
       }))
       setVideoScript(res?.data?.result);
       // console.log(res.data.result);
@@ -90,10 +90,10 @@ const CreateNew = () => {
       // console.log("GenrateAudioFile " ,response.data);
       setVideoData((prev) => ({
         ...prev,
-        "audioFileUrl" : response.data.result
+        "audioFileUrl": response.data.result
       }))
       setAudioFile(response?.data?.result);
-      response.data.result && GenerateCaption( response.data.result, videoScriptData);
+      response.data.result && GenerateCaption(response.data.result, videoScriptData);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -107,11 +107,11 @@ const CreateNew = () => {
     });
     setVideoData((prev) => ({
       ...prev,
-      "captions" : res.data.result
+      "captions": res.data.result
     }))
-      // console.log("GenerateCaption ", res.data.result);
-      setCaptions(res?.data?.result);
-      res.data.result && GenerateImage(videoScriptData);    
+    // console.log("GenerateCaption ", res.data.result);
+    setCaptions(res?.data?.result);
+    res.data.result && GenerateImage(videoScriptData);
   }
 
   //get Image
@@ -127,22 +127,22 @@ const CreateNew = () => {
     //   })
     // })
 
-    for(const element of videoScriptData){
+    for (const element of videoScriptData) {
       try {
         const res = await axios.post("/api/generate-image", {
           prompt: element?.ImagePrompt
         });
-        
+
         // console.log(res.data.result);
         images.push(res.data.result);
       } catch (error) {
-        console.log("error",error);
+        console.log("error", error);
       }
     }
 
     setVideoData((prev) => ({
       ...prev,
-      "imageList" : images
+      "imageList": images
     }));
 
     console.log("GenerateImage", images, videoScript, captions, audioFile);
@@ -151,9 +151,9 @@ const CreateNew = () => {
   }
 
   useEffect(() => {
-    console.log("useeffect videoData ",videoData);
+    console.log("useeffect videoData ", videoData);
 
-    if(Object.keys(videoData).length === 4 ) SaveData(videoData);
+    if (Object.keys(videoData).length === 4) SaveData(videoData);
   }, [videoData]);
 
   // save in database
@@ -161,13 +161,13 @@ const CreateNew = () => {
     setLoading(true);
 
     const result = await db.insert(VideoData).values({
-      script:videoData?.videoScript,
-      audioFileUrl : videoData?.audioFileUrl,
-      captions:videoData?.captions,
-      imageList:videoData?.imageList,
+      script: videoData?.videoScript,
+      audioFileUrl: videoData?.audioFileUrl,
+      captions: videoData?.captions,
+      imageList: videoData?.imageList,
       createdBy: user?.primaryEmailAddress?.emailAddress
-    }).returning({id:VideoData?.id});
-    
+    }).returning({ id: VideoData?.id });
+
     console.log(result);
     setVideoId(result[0].id);
     setPlayVideo(true);
@@ -189,7 +189,7 @@ const CreateNew = () => {
       </div>
       <CustomLoading loading={loading} />
 
-      <PlayerDialog playVideo={true} videoId={1}/>
+      <PlayerDialog playVideo={true} videoId={1} />
     </div >
   )
 }
