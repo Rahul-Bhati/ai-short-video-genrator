@@ -1,17 +1,17 @@
 "use client"
-import React, { useState, useEffect, useContext } from 'react'
-import SelectTopic from './_components/SelectTopic'
-import SelectStyle from './_components/SelectStyle';
-import SelectDuraction from './_components/SelectDuraction';
-import { Button } from '@/components/ui/button'
-import axios from 'axios';
-import CustomLoading from './_components/CustomLoading';
-import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext } from '@/app/_context/VideoDataContext';
+import { Button } from '@/components/ui/button';
 import { db } from '@/config/db';
 import { VideoData } from '@/config/schema';
 import { useUser } from '@clerk/nextjs';
+import axios from 'axios';
+import { useContext, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import PlayerDialog from '../_components/PlayerDialog';
+import CustomLoading from './_components/CustomLoading';
+import SelectDuraction from './_components/SelectDuraction';
+import SelectStyle from './_components/SelectStyle';
+import SelectTopic from './_components/SelectTopic';
 
 const CreateNew = () => {
   //   const video = [
@@ -189,7 +189,7 @@ const CreateNew = () => {
       </div>
       <CustomLoading loading={loading} />
 
-      <PlayerDialog playVideo={true} videoId={1} />
+      {playVideo && (<PlayerDialog playVideo={playVideo} videoId={videoId} />)}
     </div >
   )
 }

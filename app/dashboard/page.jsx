@@ -1,13 +1,12 @@
 "use client";
-import { Button } from '@/components/ui/button'
-import React, { useEffect, useState } from 'react'
-import EmptyState from './_components/EmptyState';
-import Link from 'next/link';
-import axios from 'axios';
+import { Button } from '@/components/ui/button';
 import { db } from '@/config/db';
 import { VideoData } from '@/config/schema';
 import { useUser } from '@clerk/nextjs';
 import { eq } from 'drizzle-orm';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import EmptyState from './_components/EmptyState';
 import { VideoList } from './_components/VideoList';
 
 function Dashboard() {

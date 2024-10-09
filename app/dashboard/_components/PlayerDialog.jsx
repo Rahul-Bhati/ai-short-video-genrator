@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Player } from "@remotion/player";
-import RemotionVideo from './RemotionVideo';
-import { Button } from '@/components/ui/button';
+  DialogTitle
+} from "@/components/ui/dialog";
 import { db } from '@/config/db';
 import { VideoData } from '@/config/schema';
+import { Player } from "@remotion/player";
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import RemotionVideo from './RemotionVideo';
 
 
 const PlayerDialog = ({ playVideo, videoId }) => {
@@ -23,7 +22,7 @@ const PlayerDialog = ({ playVideo, videoId }) => {
 
   const router = useRouter();
   useEffect(() => {
-    setOpenDialog(playVideo);
+    setOpenDialog(!openDialog);
     videoId && GetVideoData();
   }, [playVideo, videoId]);
 
