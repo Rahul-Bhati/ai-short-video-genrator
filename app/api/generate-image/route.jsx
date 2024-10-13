@@ -4,10 +4,10 @@ import { getDownloadURL, ref, uploadString } from "firebase/storage";
 import { NextResponse } from "next/server";
 
 
-export async function POST (req){
+export async function POST(req) {
     try {
         const { prompt } = await req.json();
-        
+
         function generateRandomNumber() {
             return Math.floor(Math.random() * 100000000) + 1;
         }
@@ -16,7 +16,9 @@ export async function POST (req){
 
         const imageURL = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${randomSeed}&width=1024&height=1280&nologo=True`;
 
-        // const output = await axios.get("https://image.pollinations.ai/prompt/"+prompt+"?width=1024&height=1280");
+        // const imageURL = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?seed=${randomSeed}&width=1024&height=1280&nologo=True`;
+
+        // const output = await axios.get("https://image.pollinations.ai/prompt/"+prompt+"?seed=${randomSeed}&width=1024&height=1280");
 
         const response = await fetch(imageURL);
 
@@ -30,7 +32,7 @@ export async function POST (req){
         }
 
         const base64Img = "data:image/png;base64," + await convertImage(imageURL);
-        const fileName = "ai-short-video-files/" + Date.now()+ ".png";
+        const fileName = "ai-short-video-files/" + Date.now() + ".png";
 
         // console.log(base64Img, fileName);
 
@@ -44,17 +46,17 @@ export async function POST (req){
 
         return NextResponse.json({ success: true, result: downloadurl });
     } catch (error) {
-        return NextResponse.json({'error': error});
+        return NextResponse.json({ 'error': error });
     }
 }
 
 const convertImage = async (imagurl) => {
     try {
-        const res = await axios.get(imagurl, {responseType :"arraybuffer"});
+        const res = await axios.get(imagurl, { responseType: "arraybuffer" });
         const base64Image = Buffer.from(res.data).toString("base64");
 
-        return base64Image; 
+        return base64Image;
     } catch (error) {
-        console.log("error",error);
+        console.log("error", error);
     }
 }

@@ -2,7 +2,6 @@
 import { CircleUser, FileVideo, PanelsTopLeft, ShieldPlus } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React from 'react'
 
 const SideNav = () => {
     const MenuOption = [
@@ -20,14 +19,14 @@ const SideNav = () => {
         },
         {
             id: 3,
-            name: 'Upgrade',
-            path: '/upgrade',
+            name: 'Upgrade soon',
+            path: '',
             icon: ShieldPlus
         },
         {
             id: 4,
-            name: 'Account',
-            path: '/account',
+            name: 'Account soon',
+            path: '',
             icon: CircleUser
         },
     ]

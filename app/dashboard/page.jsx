@@ -11,11 +11,10 @@ import { VideoList } from './_components/VideoList';
 
 function Dashboard() {
   const [videoList, setVideoList] = useState([]);
-
   const { user } = useUser();
   const GetVideoData = async () => {
     const result = await db.select().from(VideoData).where(eq(VideoData?.createdBy, user?.primaryEmailAddress?.emailAddress));
-    console.log(result)
+    // console.log(result)
     setVideoList(result);
   }
 

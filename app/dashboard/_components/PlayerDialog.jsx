@@ -28,7 +28,7 @@ const PlayerDialog = ({ playVideo, videoId }) => {
 
   const GetVideoData = async () => {
     const result = await db.select().from(VideoData).where(eq(VideoData.id, videoId));
-    console.log(result[0])
+    // console.log(result[0])
     setVideoData(result[0]);
 
   }
@@ -56,8 +56,11 @@ const PlayerDialog = ({ playVideo, videoId }) => {
               />
             )}
             <div className='flex gap-10 mt-10 items-center justify-center'>
-              <Button variant="ghost" onClick={() => { router.replace("/dashboard"); setOpenDialog(false) }}>cancle</Button>
-              <Button >Export</Button>
+              <Button variant="ghost" onClick={() => { router.replace("/dashboard/create-new"); setOpenDialog(false) }}>cancle</Button>
+              <div>
+                <Button >Export (soon)</Button>
+                {/* <span className='absolute bg-black text-white p-1 px-2 rounded-xl -ml-7 -mt-5'>soon</span> */}
+              </div>
             </div>
           </DialogDescription>
         </DialogHeader>

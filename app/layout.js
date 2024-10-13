@@ -1,7 +1,9 @@
-import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Outfit } from "next/font/google";
+
+import "./globals.css";
 import Provider from "./provider";
-import { Outfit } from "next/font/google"
 
 
 export const metadata = {
@@ -23,6 +25,7 @@ export default function RootLayout({ children }) {
 
             {children}
           </Provider>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
