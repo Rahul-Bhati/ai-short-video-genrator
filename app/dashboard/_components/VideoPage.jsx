@@ -80,7 +80,8 @@ const CreateNew = () => {
     try {
       const response = await axios.post('/api/generate-audio', {
         text: script,
-        id: id
+        id: id,
+        voice: "Linda"
       });
       // console.log("GenrateAudioFile " ,response.data);
       setVideoData((prev) => ({

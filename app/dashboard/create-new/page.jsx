@@ -1,259 +1,281 @@
 "use client"
-import { UserDetailContext } from '@/app/_context/UserDetailContext';
-import { VideoDataContext } from '@/app/_context/VideoDataContext';
-import { Button } from '@/components/ui/button';
-import { db } from '@/config/db';
-import { Users, VideoData } from '@/config/schema';
-import { useUser } from '@clerk/nextjs';
-import axios from 'axios';
-import { eq } from 'drizzle-orm';
-import { useContext, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { act, useContext, useEffect, useRef, useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent } from "@/components/ui/card"
+import { Youtube, BookOpen, Instagram } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
-import PlayerDialog from '../_components/PlayerDialog';
-import CustomLoading from './_components/CustomLoading';
-import SelectDuraction from './_components/SelectDuraction';
-import SelectStyle from './_components/SelectStyle';
-import SelectTopic from './_components/SelectTopic';
 
-const CreateNew = () => {
+import VideoPage from './_components/VideoPage'
+import ImagePage from './_components/ImagePage'
+import CustomLoading from './_components/CustomLoading'
+
+import { template } from '@/lib/template'
+import axios from 'axios'
+import { db } from '@/config/db'
+import { Users, VideoData } from '@/config/schema';
+import { useUser } from '@clerk/nextjs'
+import { UserDetailContext } from '@/app/_context/UserDetailContext'
+import { eq } from 'drizzle-orm'
+
+const formatResponse = (text) => {
+  // Split into lines
+  const lines = text.split('\n');
+  let formattedHtml = '';
+
+  lines.forEach(line => {
+    if (line.trim()) {  // Only process non-empty lines
+      // Handle headings
+      const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+      if (headingMatch) {
+        const level = headingMatch[1].length; // Number of # symbols
+        const headingText = headingMatch[2];
+        formattedHtml += `<h${level} class="font-bold ${level === 1 ? 'text-3xl mb-4 mt-6' :
+          level === 2 ? 'text-2xl mb-3 mt-5' :
+            level === 3 ? 'text-xl mb-2 mt-4' :
+              level === 4 ? 'text-lg mb-2 mt-3' :
+                'text-base mb-2 mt-2'
+          }">${headingText}</h${level}>`;
+      }
+      // Process bold text for non-heading lines
+      else {
+        const processedLine = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        formattedHtml += `<p class="mb-2">${processedLine}</p>`;
+      }
+    }
+  });
+
+  return formattedHtml;
+};
+
+export default function Page() {
+  const [activeTab, setActiveTab] = useState("text")
+
+  const textRef = useRef();
+  const voicetextRef = useRef();
+
   const [loading, setLoading] = useState(false);
-  const [videoScript, setVideoScript] = useState();
-  const [formData, setFormData] = useState([]);
-  const [audioFile, setAudioFile] = useState();
-  const [captions, setCaptions] = useState();
-  const [imageList, setImageList] = useState();
-
-  // video data context
-  const { videoData, setVideoData } = useContext(VideoDataContext);
+  const [data, setData] = useState(null);
+  const [voice, setVoice] = useState("Amy");
+  const [audioFile, setAudioFile] = useState(null);
+  const [textScript, setTextScript] = useState("assistant");
 
   const { user } = useUser();
-
-  const [playVideo, setPlayVideo] = useState(false);
-  const [videoId, setVideoId] = useState();
-
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
 
-  const onHandleInputChange = (fieldName, fieldValue) => {
-    // console.log(fieldName, fieldValue);
-    setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }))
-  }
+  const genText = async () => {
+    // setPrompt(textRef.current.value);
 
-  const handleCreateShortVideo = () => {
-    if (userDetail?.credits <= 0) {
-      toast("You don't have enough credits.")
-      return;
+    setLoading(true);
+    try {
+
+      let requestBody = {
+        "messages": [
+          { "role": "system", "content": "You are a helpful assistant." },
+          { "role": "user", "content": textScript + textRef.current.value }
+        ],
+        "model": "openai",
+        "seed": 42,
+        "jsonMode": true
+      };
+
+      const response = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const res = await response.text();
+      setData(formatResponse(res));
+      // console.log(res)
+    } catch (error) {
+      console.log("Error", error)
     }
-    getVideoScript();
-  }
+    setLoading(false);
+  };
 
-  // Get Video Script
-  const getVideoScript = async () => {
+  const genVoice = async () => {
     setLoading(true);
-    const prompt = `write a script to genrate ${formData.duration} video on topic : ${formData.topic} along with Ai Image prompt in ${formData.imageStyle} format for each scene and give me result in json format with ImagePrompt and ContentText as field`;
-
-    // console.log(prompt);
-    await axios.post('/api/get-video-script', {
-      prompt: prompt
-    }).then((res) => {
-      setVideoData((prev) => ({
-        ...prev,
-        "videoScript": res.data.result
-      }))
-      setVideoScript(res?.data?.result);
-      // console.log(res.data.result);
-      GenrateAudioFile(res.data.result);
-    });
-    // setLoading(false);
-  }
-
-  // get audio
-  const GenrateAudioFile = async (videoScriptData) => {
-    setLoading(true);
-
-    let script = '';
     const id = uuidv4();
-    videoScriptData.forEach((element) => {
-      script = script + element.ContentText + " ";
-    });
 
     try {
       const response = await axios.post('/api/generate-audio', {
-        text: script,
-        id: id
+        text: voicetextRef.current.value,
+        id: id,
+        voice: voice
       });
       // console.log("GenrateAudioFile " ,response.data);
-      setVideoData((prev) => ({
-        ...prev,
-        "audioFileUrl": response.data.result
-      }))
+      await db.update(Users).set({ credits: userDetail?.credits - 5 }).where(eq(Users?.email, user?.primaryEmailAddress?.emailAddress));
+
+      setUserDetail(prev => ({
+        ...prev, "credits": userDetail?.credits - 5
+      }));
+
       setAudioFile(response?.data?.result);
-      response.data.result && GenerateCaption(response.data.result, videoScriptData);
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      alert(err?.response?.data?.error);
+      console.error('Error:', err);
     }
-  }
-
-  // get captions
-  const GenerateCaption = async (audioFileData, videoScriptData) => {
-    setLoading(true);
-    const res = await axios.post("/api/generate-caption", {
-      audioFileUrl: audioFileData
-    });
-    setVideoData((prev) => ({
-      ...prev,
-      "captions": res.data.result
-    }))
-    // console.log("GenerateCaption ", res.data.result);
-    setCaptions(res?.data?.result);
-    res.data.result && GenerateImage(videoScriptData);
-  }
-
-  //get Image
-  const GenerateImage = async (videoScriptData) => {
-    let images = [];
-    for (const element of videoScriptData) {
-      try {
-        const res = await axios.post("/api/generate-image", {
-          prompt: element?.ImagePrompt
-        });
-
-        // console.log(res.data.result);
-        images.push(res.data.result);
-      } catch (error) {
-        console.log("error", error);
-      }
-    }
-
-    setVideoData((prev) => ({
-      ...prev,
-      "imageList": images
-    }));
-
-    // console.log("GenerateImage", images, videoScript, captions, audioFile);
-    setImageList(images);
     setLoading(false);
   }
 
-  useEffect(() => {
-    // console.log("useeffect videoData ", videoData);
-
-    videoData && (Object.keys(videoData).length === 4) ? SaveData(videoData) : "";
-  }, [videoData]);
-
-  // save in database
-  const SaveData = async (videoData) => {
-    setLoading(true);
-
-    const result = await db.insert(VideoData).values({
-      script: videoData?.videoScript,
-      audioFileUrl: videoData?.audioFileUrl,
-      captions: videoData?.captions,
-      imageList: videoData?.imageList,
-      createdBy: user?.primaryEmailAddress?.emailAddress
-    }).returning({ id: VideoData?.id });
-
-    // console.log(result);
-    await UpdateUserCreadit();
-    setVideoId(result[0].id);
-    setPlayVideo(true);
-    setLoading(false);
-  }
-
-  // udate creadits when user gen videos
-  const UpdateUserCreadit = async () => {
-    const result = await db.update(Users).set({ credits: userDetail?.credits - 10 }).where(eq(Users?.email, user?.primaryEmailAddress?.emailAddress));
-
-    setUserDetail(prev => ({
-      ...prev, "credits": userDetail?.credits - 10
-    }));
-
-    setVideoData(null)
-  }
 
   return (
-    <div className="md:px-10" >
-      <h2 className="font-bold text-4xl text-primary text-center">Create New</h2>
-      <div className="mt-10 p-10 shadow-md">
-        {/* select topic */}
-        <SelectTopic onUserSelect={onHandleInputChange} />
-        {/* select style */}
-        <SelectStyle onUserSelect={onHandleInputChange} />
-        {/* Duration */}
-        <SelectDuraction onUserSelect={onHandleInputChange} />
-        {/* Create Button */}
-        <Button className="mt-10 w-full" onClick={handleCreateShortVideo}>Create Short Video</Button>
+    <>
+      <div className='min-h-screen-600 px-6 py-10 bg-gradient-to-r from-purple-500 to-pink-500'>
+        <div className="max-w-4xl mx-auto space-y-6 ">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-fit mx-auto rounded-3xl px-4 py-2">
+            <TabsList className="bg-white/20 transition-all animate-in text-white">
+              <TabsTrigger value="text" className=" data-[state=active]:bg-purple-700 data-[state=active]:text-white" onClick={() => setActiveTab("text")}>Text</TabsTrigger>
+              <TabsTrigger value="voice" className="  data-[state=active]:bg-purple-700 data-[state=active]:text-white" onClick={() => setActiveTab("voice")}>Voice</TabsTrigger>
+              <TabsTrigger value="image" className="  data-[state=active]:bg-purple-700 data-[state=active]:text-white" onClick={() => setActiveTab("image")}>Image</TabsTrigger>
+              <TabsTrigger value="video" className="  data-[state=active]:bg-purple-700 data-[state=active]:text-white" onClick={() => setActiveTab("video")}>Video</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
       <CustomLoading loading={loading} />
+      <div className="min-h-screen-600 py-2 md:p-6" >
+        <div className="max-w-4xl mx-auto space-y-6 ">
 
-      {playVideo && (<PlayerDialog playVideo={playVideo} videoId={videoId} />)}
-    </div >
+
+          {/* Text Templates Section */}
+          {activeTab === "text" && (
+            <>
+              <div className="relative">
+                <Input
+                  ref={textRef}
+                  placeholder="ask your query here..."
+                  className="w-full py-6 pr-24 text-lg bg-white rounded-full shadow-lg"
+                />
+                <Button className="absolute right-5 top-1/2 transform -translate-y-1/2 bg-purple-700 hover:bg-purple-800 text-white" onClick={genText}>
+                  Go
+                </Button>
+
+              </div>
+              <div className="relative flex gap-4 flex-wrap items-center">
+                <label>Template</label>
+                <Select onValueChange={(value) => setTextScript(value)}>
+                  <SelectTrigger className="w-[260px]">
+                    <SelectValue placeholder="Select Template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {template.map((model, index) => (
+                      <SelectItem value={model.script} key={index}>{model.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="bg-white rounded-lg md:p-6">
+
+                {textRef.current?.value && (
+                  <div className="flex flex-col gap-4">
+                    {/* <div className="max-w-[80%] self-end p-4 bg-purple-100 rounded-2xl rounded-tr-none">
+                      <p className="text-gray-800">{textRef.current.value}</p>
+                      <span className="text-xs text-gray-500 mt-1 block">You</span>
+                    </div> */}
+                    <div className="max-w-[80%] self-start p-4 bg-white shadow-sm rounded-2xl rounded-tl-none">
+                      <div
+                        className="text-gray-800 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: data }}
+                      />
+                      <span className="text-xs text-gray-500 mt-1 block">AI Assistant</span>
+                    </div>
+                  </div>
+                )}
+                {/* <h2 className="text-2xl font-bold mb-4">Templates</h2>
+              <p className="text-gray-600 mb-6">Pick from our curated templates</p>
+
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <Card className="bg-red-500 text-white">
+                  <CardContent className="p-6 flex flex-col items-center justify-center h-40">
+                    <Youtube size={40} />
+                    <h3 className="md:text-base text-xl font-semibold mt-4">Script for YouTube Video</h3>
+                  </CardContent>
+                </Card>
+                <Card className="bg-purple-500 text-white">
+                  <CardContent className="p-6 flex flex-col items-center justify-center h-40">
+                    <BookOpen size={40} />
+                    <h3 className="text-xl font-semibold mt-4">Full Blog Generator</h3>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-pink-500 to-orange-400 text-white">
+                  <CardContent className="p-6 flex flex-col items-center justify-center h-40">
+                    <Instagram size={40} />
+                    <h3 className="text-xl font-semibold mt-4">Instagram Caption</h3>
+                  </CardContent>
+                </Card>
+              </div> */}
+              </div>
+            </>
+
+          )}
+
+          {activeTab === "voice" && (
+            <>
+              <div className="relative">
+                <Input
+                  ref={voicetextRef}
+                  placeholder="write text that you want to cahnge in voice..."
+                  className="w-full py-6 pr-24 text-lg bg-white rounded-full shadow-lg"
+                />
+                <Button className="absolute right-5 top-1/2 transform -translate-y-1/2 bg-purple-700 hover:bg-purple-800 text-white" onClick={genVoice}>
+                  Go
+                </Button>
+
+              </div>
+              <div className="relative flex gap-4 flex-wrap items-center">
+                <label>Select Voices</label>
+                <Select onValueChange={(value) => setVoice(value)}>
+                  <SelectTrigger className="w-[260px]">
+                    <SelectValue placeholder="Default Amy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Amy">Amy</SelectItem>
+                    <SelectItem value="Mary">Mary</SelectItem>
+                    <SelectItem value="John">John</SelectItem>
+                    <SelectItem value="Mike">Mike</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="bg-white rounded-lg md:p-6">
+
+                {audioFile && (
+                  <>
+                    {/* <h2 className="text-xs text-gray-500 mt-1 block">Generated Audio</h2> */}
+                    <div className="flex flex-col gap-4 items-center">
+
+                      <audio controls className="min-w-[100px] justify-center items-center self-center">
+                        <source src={audioFile} type="audio/mp3" />
+                        Your browser does not support the audio element.
+                      </audio>
+
+                    </div>
+
+                  </>
+                )}
+
+              </div>
+            </>
+
+          )}
+
+          {/* Image Templates Section */}
+          {activeTab === "image" && (
+            <ImagePage />
+          )}
+
+          {/* Video Section */}
+          {activeTab === "video" && (
+            <VideoPage />
+          )}
+        </div>
+      </div>
+
+    </>
   )
 }
-
-export default CreateNew
-
-// "use client"
-// import { useState } from 'react'
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Card, CardContent } from "@/components/ui/card"
-// import { Youtube, BookOpen, Instagram } from 'lucide-react'
-
-// export default function Page() {
-//   const [activeTab, setActiveTab] = useState("text")
-
-//   return (
-//     <div className="min-h-screen-600 p-6">
-//       <div className="max-w-4xl mx-auto space-y-6">
-//         {/* Header Tabs */}
-//         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-fit mx-auto rounded-3xl border-2 px-4 py-2">
-//           <TabsList className="bg-white/20 backdrop-blur-sm transition-all animate-in">
-//             <TabsTrigger value="text" className=" data-[state=active]:bg-purple-700 data-[state=active]:text-white">Text</TabsTrigger>
-//             <TabsTrigger value="voice" className="  data-[state=active]:bg-purple-700 data-[state=active]:text-white">Voice</TabsTrigger>
-//             <TabsTrigger value="image" className="  data-[state=active]:bg-purple-700 data-[state=active]:text-white">Image</TabsTrigger>
-//           </TabsList>
-//         </Tabs>
-
-//         {/* Main Input */}
-//         <div className="relative">
-//           <Input 
-//             placeholder="Describe what you want to create" 
-//             className="w-full py-6 pr-24 text-lg bg-white rounded-full shadow-lg"
-//           />
-//           <Button className="absolute right-5 top-1/2 transform -translate-y-1/2 bg-purple-700 hover:bg-purple-800 text-white">
-//             Go
-//           </Button>
-//         </div>
-
-//         {/* Templates Section */}
-//         <div className="bg-white rounded-lg p-6">
-//           <h2 className="text-2xl font-bold mb-4">Templates</h2>
-//           <p className="text-gray-600 mb-6">Pick from our curated templates</p>
-          
-//           <div className="grid md:grid-cols-3 gap-4">
-//             <Card className="bg-red-500 text-white">
-//               <CardContent className="p-6 flex flex-col items-center justify-center h-40">
-//                 <Youtube size={40} />
-//                 <h3 className="text-xl font-semibold mt-4">Script for YouTube Video</h3>
-//               </CardContent>
-//             </Card>
-//             <Card className="bg-purple-500 text-white">
-//               <CardContent className="p-6 flex flex-col items-center justify-center h-40">
-//                 <BookOpen size={40} />
-//                 <h3 className="text-xl font-semibold mt-4">Full Blog Generator</h3>
-//               </CardContent>
-//             </Card>
-//             <Card className="bg-gradient-to-br from-pink-500 to-orange-400 text-white">
-//               <CardContent className="p-6 flex flex-col items-center justify-center h-40">
-//                 <Instagram size={40} />
-//                 <h3 className="text-xl font-semibold mt-4">Instagram Caption</h3>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }

@@ -9,7 +9,7 @@ import { storage } from '@/config/FirebaseConfig';
 export async function POST(req) {
   try {
     // Parse the request body for the text content to convert to speech
-    const { text, id } = await req.json();
+    const { text, id, voice } = await req.json();
 
     const storageRef = ref(storage, "ai-short-video-files/" + id + ".mp3");
     // console.log(text, id);
@@ -17,7 +17,21 @@ export async function POST(req) {
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
-    // A BUSTLING MAKETPLACE in ancient rome, with people selling goods, merchants haggling, and citizens going about their daily lives. Realistic, detailed, and vibrant colors. 
+    // 
+
+    // Check text length limit for non-Linda voices
+    if (voice !== 'Linda') {
+      // Approximate words per minute for average speech
+      const wordsPerMinute = 150;
+      const wordCount = text.split(/\s+/).length;
+      const estimatedMinutes = wordCount / wordsPerMinute;
+
+      if (estimatedMinutes > 1) {
+        return NextResponse.json({
+          error: 'Text is too long. Please limit to approximately 150 words for 1 minute audio.'
+        }, { status: 400 });
+      }
+    }
 
     const apiUrl = 'https://api.voicerss.org/';
 
@@ -25,6 +39,7 @@ export async function POST(req) {
       key: process.env.NEXT_PUBLIC_RSS_VOICE_API_KEY,
       src: text,
       hl: 'en-us',
+      v: voice,
       c: 'MP3',
       f: '16khz_16bit_stereo',
       r: '-2'

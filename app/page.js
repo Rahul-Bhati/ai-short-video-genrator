@@ -41,18 +41,23 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { UserButton } from "@clerk/nextjs"
+import { auth } from '@clerk/nextjs/server'
 import { ArrowRight, Image as ImageIcon, Info } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth()
+  console.log(userId);
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 text-white" style={{ backgroundImage: 'url("https://assets.cohesive.so/landing/BG-Landing.webp?fm=webp")' }}>
         <header className="px-4 lg:px-6 h-14 flex items-center">
           <Link className="flex items-center justify-center" href="#">
             <ImageIcon className="h-6 w-6 mr-2" />
-            <span className="font-bold">AI Creator</span>
+            <span className="font-bold">Creati</span>
           </Link>
           <nav className="ml-auto flex gap-4 sm:gap-6">
             <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
@@ -68,7 +73,8 @@ export default function LandingPage() {
               Contact
             </Link>
             <Link href={"/dashboard"} className="text-sm font-medium hover:underline underline-offset-4">
-              Login
+
+              {userId ? <UserButton /> : <>Login</>}
             </Link>
           </nav>
         </header>
@@ -111,21 +117,21 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <Image src={"/image-generator.png"} width={50} height={50} />
+                <Image src={"/image-generator.png"} alt="image-gen" width={50} height={50} />
                 <h3 className="text-xl font-bold">Text-to-Image Generation</h3>
                 <p className="text-gray-500 dark:text-gray-400 text-center">
                   Transform your words into stunning visuals with our AI-powered image generation.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <Image src={"/voice-message.png"} width={50} height={50} />
+                <Image src={"/voice-message.png"} alt="text-to-voice" width={50} height={50} />
                 <h3 className="text-xl font-bold">Text-to-Voice Conversion</h3>
                 <p className="text-gray-500 dark:text-gray-400 text-center">
                   Bring your text to life with natural-sounding voices in multiple languages.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 border-gray-800 p-4 rounded-lg">
-                <Image src={"/video-sharing.png"} width={50} height={50} />
+                <Image src={"/video-sharing.png"} alt="video gen" width={50} height={50} />
                 <h3 className="text-xl font-bold">AI-powered Video Generation</h3>
                 <p className="text-gray-500 dark:text-gray-400 text-center">
                   Create engaging videos from your content with just a few clicks.

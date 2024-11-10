@@ -17,18 +17,18 @@ const SideNav = () => {
             path: '/dashboard/create-new',
             icon: FileVideo
         },
-        {
-            id: 3,
-            name: 'Upgrade soon',
-            path: '',
-            icon: ShieldPlus
-        },
-        {
-            id: 4,
-            name: 'Account soon',
-            path: '',
-            icon: CircleUser
-        },
+        // {
+        //     id: 3,
+        //     name: 'Upgrade soon',
+        //     path: '/payment',
+        //     icon: ShieldPlus
+        // },
+        // {
+        //     id: 4,
+        //     name: 'Buy me coffie',
+        //     path: '',
+        //     icon: CircleUser
+        // },
     ]
 
     const path = usePathname();
@@ -44,6 +44,13 @@ const SideNav = () => {
                         </div>
                     </Link>
                 ))}
+
+                <Link href={"https://buymeacoffee.com/rahulbhati"} target="_blank" rel="noopener noreferrer">
+                    <div className={`flex items-center gap-3 p-3 hover:bg-primary hover:text-white rounded-md cursor-pointer`}>
+                        <img src='/buymecoffie.png' alt='buymecoffie' className='w-5' />
+                        <h2>Buy me coffie</h2>
+                    </div>
+                </Link>
             </div>
         </div >
     )

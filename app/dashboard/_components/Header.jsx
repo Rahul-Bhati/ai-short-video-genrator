@@ -16,7 +16,7 @@ const Header = () => {
             </div>
             <div className='flex gap-3 items-center'>
                 <div className='flex items-center gap-2'>
-                    <Image src={"/coin.png"} width={20} height={20} />
+                    <Image src={"/coin.png"} width={20} height={20} alt='token img' />
                     <h2>{userDetail?.credits}</h2>
                 </div>
                 <Button >Dashboard</Button>

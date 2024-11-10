@@ -25,16 +25,14 @@ const RemotionVideo = ({ script, audioFileUrl, imageList, captions, setDurationI
           idx % 2 == 0 ? [1, 1.8, 1] : [1.8, 1, 1.8], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
         );
         return (
-          <>
-            <Sequence key={index} from={startTime} durationInFrames={getDuractionFrames()} className="flex justify-center items-center">
-              <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-                <Img src={item} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${scale(index)})` }} />
-                <AbsoluteFill style={{ color: "white", justifyContent: "center", top: undefined, bottom: 50, height: 150, alignItems: "center", textAlign: "center", width: "100%" }}>
-                  <h2 className="text-2xl">{getCurrentWordFromCaptions()}</h2>
-                </AbsoluteFill>
+          <Sequence key={index} from={startTime} durationInFrames={getDuractionFrames()} className="flex justify-center items-center">
+            <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+              <Img src={item} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${scale(index)})` }} />
+              <AbsoluteFill style={{ color: "white", justifyContent: "center", top: undefined, bottom: 50, height: 150, alignItems: "center", textAlign: "center", width: "100%" }}>
+                <h2 className="text-2xl">{getCurrentWordFromCaptions()}</h2>
               </AbsoluteFill>
-            </Sequence>
-          </>
+            </AbsoluteFill>
+          </Sequence>
         )
       }
       )}
