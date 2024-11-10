@@ -174,10 +174,6 @@ export default function Page() {
 
                 {textRef.current?.value && (
                   <div className="flex flex-col gap-4">
-                    {/* <div className="max-w-[80%] self-end p-4 bg-purple-100 rounded-2xl rounded-tr-none">
-                      <p className="text-gray-800">{textRef.current.value}</p>
-                      <span className="text-xs text-gray-500 mt-1 block">You</span>
-                    </div> */}
                     <div className="max-w-[80%] self-start p-4 bg-white shadow-sm rounded-2xl rounded-tl-none">
                       <div
                         className="text-gray-800 prose prose-sm max-w-none"
@@ -187,29 +183,6 @@ export default function Page() {
                     </div>
                   </div>
                 )}
-                {/* <h2 className="text-2xl font-bold mb-4">Templates</h2>
-              <p className="text-gray-600 mb-6">Pick from our curated templates</p>
-
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <Card className="bg-red-500 text-white">
-                  <CardContent className="p-6 flex flex-col items-center justify-center h-40">
-                    <Youtube size={40} />
-                    <h3 className="md:text-base text-xl font-semibold mt-4">Script for YouTube Video</h3>
-                  </CardContent>
-                </Card>
-                <Card className="bg-purple-500 text-white">
-                  <CardContent className="p-6 flex flex-col items-center justify-center h-40">
-                    <BookOpen size={40} />
-                    <h3 className="text-xl font-semibold mt-4">Full Blog Generator</h3>
-                  </CardContent>
-                </Card>
-                <Card className="bg-gradient-to-br from-pink-500 to-orange-400 text-white">
-                  <CardContent className="p-6 flex flex-col items-center justify-center h-40">
-                    <Instagram size={40} />
-                    <h3 className="text-xl font-semibold mt-4">Instagram Caption</h3>
-                  </CardContent>
-                </Card>
-              </div> */}
               </div>
             </>
 
@@ -271,7 +244,15 @@ export default function Page() {
 
           {/* Video Section */}
           {activeTab === "video" && (
-            <VideoPage />
+            <>
+
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 my-4 rounded">
+                <p className="text-yellow-700">
+                  <span className="font-bold">Note:</span>"Please be patient; video generation may take up to 5 minutes as we are using free AI models."
+                </p>
+              </div>
+              <VideoPage />
+            </>
           )}
         </div>
       </div>

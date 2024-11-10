@@ -20,7 +20,8 @@ const ImagePage = () => {
 
         setImgGen(true);
         try {
-            const imageURL = `https://image.pollinations.ai/prompt/${encodeURIComponent(textRef.current.value)}?seed=${Math.random()}&width=${width}&height=${height}&nologo=True&model=${selectModel}`;
+            const seeds = Math.floor(Math.random() * 100000000) + 1;
+            const imageURL = `https://image.pollinations.ai/prompt/${encodeURIComponent(textRef.current.value)}?seed=${seeds}&width=${width}&height=${height}&nologo=True&model=${selectModel}`;
 
             // console.log(imageURL)
 
@@ -99,18 +100,15 @@ const ImagePage = () => {
                     </Select>
                 </div>
             </div>
-            {/* {imgGen && <GenImage prompt={prompt} height={height} width={width} selectModel={selectModel} />} */}
 
             <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 my-4 rounded">
                 <p className="text-yellow-700">
                     <span className="font-bold">Note:</span> The generated images are not saved in the database. If you want to keep them, please download them to your device.
                 </p>
             </div>
-            <CustomLoading loading={imgGen} />
-            {/* <div className='w-[1000px] h-[700px] object-cover'> */}
+            <CustomLoading loading={imgGen} type="" />
 
             {imgUrl !== null && <img src={imgUrl} alt='generated-image' className='w-[100%]' />}
-            {/* </div> */}
         </div>
     );
 };

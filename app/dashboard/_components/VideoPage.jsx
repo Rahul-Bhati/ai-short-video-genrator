@@ -175,6 +175,7 @@ const CreateNew = () => {
   return (
     <div className="md:px-10" >
       <h2 className="font-bold text-4xl text-primary text-center">Create New</h2>
+
       <div className="mt-10 p-10 shadow-md">
         {/* select topic */}
         <SelectTopic onUserSelect={onHandleInputChange} />
@@ -182,10 +183,12 @@ const CreateNew = () => {
         <SelectStyle onUserSelect={onHandleInputChange} />
         {/* Duration */}
         <SelectDuraction onUserSelect={onHandleInputChange} />
+
         {/* Create Button */}
         <Button className="mt-10 w-full" onClick={handleCreateShortVideo}>Create Short Video</Button>
       </div>
-      <CustomLoading loading={loading} />
+
+      <CustomLoading loading={true} type="video" />
 
       {playVideo && (<PlayerDialog playVideo={playVideo} videoId={videoId} />)}
     </div >
