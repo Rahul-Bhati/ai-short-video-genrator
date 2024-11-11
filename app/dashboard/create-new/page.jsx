@@ -1,16 +1,16 @@
 "use client"
-import { act, useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { Youtube, BookOpen, Instagram } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from 'uuid';
 
-import VideoPage from './_components/VideoPage'
-import ImagePage from './_components/ImagePage'
-import CustomLoading from './_components/CustomLoading'
+import dynamic from 'next/dynamic';
+
+const VideoPage = dynamic(() => import('./_components/VideoPage'), { ssr: false });
+const ImagePage = dynamic(() => import('./_components/ImagePage'), { ssr: false });
+const CustomLoading = dynamic(() => import('./_components/CustomLoading'), { ssr: false });
 
 import { template } from '@/lib/template'
 import axios from 'axios'
@@ -190,6 +190,11 @@ export default function Page() {
 
           {activeTab === "voice" && (
             <>
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 my-4 rounded">
+                <p className="text-yellow-700">
+                  <span className="font-bold">Note:</span> Voice generation can only process text with a maximum of 150 words at a time.
+                </p>
+              </div>
               <div className="relative">
                 <Input
                   ref={voicetextRef}

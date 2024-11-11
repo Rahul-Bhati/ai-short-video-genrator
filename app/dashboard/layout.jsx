@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { eq } from 'drizzle-orm';
 import { useEffect, useState } from 'react';
 import { UserDetailContext } from '../_context/UserDetailContext';
-import { VideoDataContext } from '../_context/VideoDataContext';
+import { VideoDataContext, VideoDataProvider } from '../_context/VideoDataContext';
 import Header from './_components/Header';
 import SideNav from './_components/SideNav';
 
@@ -27,18 +27,19 @@ export default function DashboardLayout({ children }) {
         // <UserDetailContext.Provider >
         <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
             <VideoDataContext.Provider value={{ videoData, setVideoData }}>
-
-                <div>
-                    <div className='hidden md:block h-screen w-64 bg-white fixed mt-[65px]'>
-                        <SideNav />
-                    </div>
+                <VideoDataProvider>
                     <div>
-                        <Header />
-                        <div className='md:ml-64 p-10'>
-                            {children}
+                        <div className='hidden md:block h-screen w-64 bg-white fixed mt-[65px]'>
+                            <SideNav />
+                        </div>
+                        <div>
+                            <Header />
+                            <div className='md:ml-64 p-10 pt-20'>
+                                {children}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </VideoDataProvider>
             </VideoDataContext.Provider>
         </UserDetailContext.Provider>
 

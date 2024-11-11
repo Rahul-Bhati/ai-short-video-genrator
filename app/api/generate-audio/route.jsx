@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import { promises as fs } from 'fs';
-import path from 'path';
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from '@/config/FirebaseConfig';
 
